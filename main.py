@@ -1,7 +1,7 @@
 # main.py
-from modules.io.tencode import text_to_bytes
-from modules.io.tdecode import bytes_to_text
-from modules.nlp.engine import analyze_and_store_language  # Import the engine function
+from modules.io.text.tencode import text_to_bytes
+from modules.io.text.tdecode import bytes_to_text
+from modules.language.engine import analyze_and_store_language  # Import the engine function
 
 def main():
     print("Type text to encode, analyze, and store. Type 'exit' to quit.\n")
