@@ -1,8 +1,7 @@
 # main.py
 from modules.io.tencode import text_to_bytes
 from modules.io.tdecode import bytes_to_text
-from modules.nlp.nlp import analyze_text_signal
-from modules.neural.engine import nearest
+from modules.nlp.engine import analyze_and_store_language  # Import the engine function
 
 def main():
     print("Type text to encode, analyze, and store. Type 'exit' to quit.\n")
@@ -13,7 +12,7 @@ def main():
             print("Exiting...")
             break
         if not user_text.strip():
-            print("🛑 Empty input detected. Try entering real text.\n")
+            print("Empty input detected. Try entering real text.\n")
             continue
 
         encoded_bytes = text_to_bytes(user_text)
@@ -23,12 +22,8 @@ def main():
         print(f"Decoded Text: {decoded_text}\n")
 
         print("Saving semantic memory...")
-        analyze_text_signal(user_text, source='user')
+        analyze_and_store_language(user_text)  # Call the engine function
         print("✔ Memory saved.\n")
-
-        print("Computing neural signature...")
-        matches = nearest(user_text)  # Remove k=3 parameter
-        print(f"✔ Neuron saved. Found {len(matches)} similar patterns.\n")
 
 if __name__ == "__main__":
     main()
