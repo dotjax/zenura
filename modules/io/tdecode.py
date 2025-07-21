@@ -1,20 +1,38 @@
-def bytes_to_text(byte_values, verbose=True):
-    byte_data = bytes(byte_values)
+def bytes_to_text(byte_values, bits=8, verbose=True):
+    # reconstruct raw buffer depending on bit-width
+    if bits == 8:
+        raw_bytes = bytes(byte_values)
+        units = byte_values
+        zfill_w = 8
+    elif bits == 16:
+        # each value is a 16-bit word
+        ba = bytearray()
+        for w in byte_values:
+            ba.extend(w.to_bytes(2, 'big'))
+        raw_bytes = bytes(ba)
+        units = byte_values
+        zfill_w = 16
+    else:
+        raise ValueError("bits must be 8 or 16")
 
     if verbose:
         print("\nASCII Analysis:")
-        prev_byte = None
-        for byte in byte_values:
-            char = chr(byte)
-            print(f"{byte} (dec) = {bin(byte)[2:].zfill(8)} (bin) -> '{char}'")
-            if prev_byte is not None:
-                diff = byte - prev_byte
-                xor = byte ^ prev_byte
+        prev_unit = None
+        for unit in units:
+            char = chr(unit)
+            print(f"{unit} (dec) = {bin(unit)[2:].zfill(zfill_w)} (bin) -> '{char}'")
+            if prev_unit is not None:
+                diff = unit - prev_unit
+                xorv = unit ^ prev_unit
                 print(f"  Δ from previous: {diff} steps")
-                print(f"  XOR pattern: {bin(xor)[2:].zfill(8)}")
-            prev_byte = byte
+                print(f"  XOR pattern: {bin(xorv)[2:].zfill(zfill_w)}")
+            prev_unit = unit
 
-    return byte_data.decode('utf-8')
+    # decode from raw bytes using UTF encoding matching bit-width
+    if bits == 8:
+        return raw_bytes.decode('utf-8')
+    else:
+        return raw_bytes.decode('utf-16-be')
 
 if __name__ == "__main__":
     # Example test vector

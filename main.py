@@ -2,9 +2,9 @@
 from modules.io.tencode import text_to_bytes
 from modules.io.tdecode import bytes_to_text
 from modules.nlp.nlp import analyze_text_signal
+from modules.neural.engine import nearest
 
 def main():
-    print("Byte-Native NLP Engine 🧠")
     print("Type text to encode, analyze, and store. Type 'exit' to quit.\n")
 
     while True:
@@ -25,6 +25,10 @@ def main():
         print("Saving semantic memory...")
         analyze_text_signal(user_text, source='user')
         print("✔ Memory saved.\n")
+
+        print("Computing neural signature...")
+        matches = nearest(user_text)  # Remove k=3 parameter
+        print(f"✔ Neuron saved. Found {len(matches)} similar patterns.\n")
 
 if __name__ == "__main__":
     main()
