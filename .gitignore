@@ -3,9 +3,7 @@ __pycache__/
 *.py[cod]
 
 # Data
-data/input
-data/neural
-data/output
+data/
 
 # C extensions
 *.so
