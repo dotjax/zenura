@@ -13,7 +13,7 @@ def text_to_bytes(text=None):
         if prev_unit is not None:
             diff = unit - prev_unit
             xorv = unit ^ prev_unit
-            print(f"  Δ from {chr(prev_unit)}: {diff} steps")
+            print(f"  Delta from {chr(prev_unit)}: {diff} steps")
             print(f"  XOR pattern: {bin(xorv)[2:].zfill(zfill_w)}")
         prev_unit = unit
 
