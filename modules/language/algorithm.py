@@ -4,12 +4,13 @@ import importlib.util
 from datetime import datetime
 from pathlib import Path
 
+from modules.language.ageneralizer import generalize  # NEW
+
 input_dir = "data/input"
 output_dir = "data/neural/language"
 os.makedirs(output_dir, exist_ok=True)
 
 memory = {}
-
 
 def load_input_file(path):
     with open(path, 'r', encoding='utf-8') as f:
@@ -17,7 +18,6 @@ def load_input_file(path):
     namespace = {}
     exec(data, namespace)
     return namespace
-
 
 def update_memory(byte_values, delta, xor):
     for i in range(1, len(byte_values)):
@@ -29,7 +29,6 @@ def update_memory(byte_values, delta, xor):
             memory[pattern][prediction] = 0
         memory[pattern][prediction] += 1
 
-
 def save_memory(filename, memory):
     output_path = os.path.join(output_dir, filename)
     with open(output_path, 'w', encoding='utf-8') as f:
@@ -38,7 +37,6 @@ def save_memory(filename, memory):
             f.write(f"    {key}: {outcomes},\n")
         f.write("}\n")
     print(f"Saved learned memory to {output_path}")
-
 
 def process():
     for file in os.listdir(input_dir):
@@ -66,6 +64,14 @@ def process():
                 local_memory[pattern][prediction] = 0
             local_memory[pattern][prediction] += 1
 
+        # 🔁 Generalize before saving
+        generalized = generalize(local_memory)
+        for pattern, predictions in generalized.items():
+            if pattern not in local_memory:
+                local_memory[pattern] = {}
+            for pred, count in predictions.items():
+                local_memory[pattern][pred] = local_memory[pattern].get(pred, 0) + count
+
         base_name = Path(file).stem.replace("text_", "learned_")
         out_name = f"{base_name}.py"
         save_memory(out_name, local_memory)
@@ -78,7 +84,6 @@ def process():
                 for pred, count in v.items():
                     memory[k][pred] = memory[k].get(pred, 0) + count
 
-
 def predict(prev, delta, xor):
     key = (prev, delta, xor)
     if key in memory:
@@ -86,7 +91,6 @@ def predict(prev, delta, xor):
         confidence = memory[key][prediction]
         return prediction, confidence
     return None, 0
-
 
 if __name__ == "__main__":
     process()

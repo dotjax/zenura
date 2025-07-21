@@ -3,22 +3,22 @@ import importlib.util
 from datetime import datetime
 
 
-def load_all_learned_memory(directory="data/neural/language"):
-    memory = {}
-    for filename in os.listdir(directory):
-        if filename.endswith(".py") and filename.startswith("learned_"):
-            path = os.path.join(directory, filename)
-            spec = importlib.util.spec_from_file_location("learned", path)
-            learned = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(learned)
-            local_mem = learned.memory
-            for key, outcomes in local_mem.items():
-                if key not in memory:
-                    memory[key] = outcomes
-                else:
-                    for val, count in outcomes.items():
-                        memory[key][val] = memory[key].get(val, 0) + count
-    return memory
+def load_latest_learned_memory(directory="data/neural/language"):
+    files = sorted(
+        (f for f in os.listdir(directory) if f.endswith(".py") and f.startswith("learned_")),
+        key=lambda f: os.path.getmtime(os.path.join(directory, f)),
+        reverse=True
+    )
+    if not files:
+        print("No learned memory files found.")
+        return {}
+
+    path = os.path.join(directory, files[0])
+    print(f"Decoding from latest memory file: {files[0]}")
+    spec = importlib.util.spec_from_file_location("learned", path)
+    learned = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(learned)
+    return learned.memory
 
 
 def decode_learned_memory(memory):
@@ -35,10 +35,8 @@ def decode_learned_memory(memory):
         delta_values.append(key[1])
         xor_values.append(key[2])
 
-    # Add final predicted byte
     text_bytes.append(next_byte)
 
-    # Build analysis
     prev_unit = None
     for unit in text_bytes:
         char = chr(unit)
@@ -81,7 +79,14 @@ xor = {xor_values}
     print(f"Output Text: {decoded_text}")
 
 
-if __name__ == "__main__":
-    memory = load_all_learned_memory()
+def generate_and_save_output():
+    memory = load_latest_learned_memory()
+    if not memory:
+        return "[No learned memory to decode.]"
     decoded_text, text_bytes, delta_values, xor_values, analysis_lines = decode_learned_memory(memory)
     save_output(decoded_text, text_bytes, delta_values, xor_values, analysis_lines)
+    return decoded_text
+
+
+if __name__ == "__main__":
+    generate_and_save_output()
