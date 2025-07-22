@@ -1,5 +1,7 @@
 from modules.language.encode import text_to_file
-from modules.language import algorithm, generator
+# Import the new controller and the map module (to access its memory)
+from modules.language.algorithms import controller, map
+from modules.language import generator
 
 def interactive_loop():
     print("Type text to encode, learn, respond, and save. Type 'exit' to quit.\n")
@@ -19,9 +21,15 @@ def interactive_loop():
                 print("Empty input detected. Try again.\n")
                 continue
 
+            # This part remains the same
             text_to_file(user_input, input_dir, "text_", show_analysis=True)
-            algorithm.process()
-            generated_bytes = generator.generate_response(algorithm.memory)
+            
+            # Call the new controller to run the entire learning pipeline.
+            # This will handle mapping, clustering, and updating the final memory.
+            controller.run_pipeline()
+            
+            # The generator gets the final, processed memory from map.memory
+            generated_bytes = generator.generate_response(map.memory)
             
             if generated_bytes:
                 response = bytes(generated_bytes).decode('utf-8', errors='ignore')
@@ -35,6 +43,10 @@ def interactive_loop():
             break
 
 def main():
+    # Run the full pipeline once at the start to load all existing data
+    print("[System starting... Initializing learning pipeline.]")
+    controller.run_pipeline()
+    print("[Initialization complete. Ready for input.]")
     interactive_loop()
 
 if __name__ == "__main__":
