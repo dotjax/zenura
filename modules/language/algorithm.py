@@ -3,11 +3,10 @@ import ast
 import importlib.util
 from datetime import datetime
 from pathlib import Path
+from modules.language import generalizer  # Correct import for generalizer
 
-from modules.language.ageneralizer import generalize  # NEW
-
-input_dir = "data/input"
-output_dir = "data/neural/language"
+input_dir = "data/neural/language/input/user/"
+output_dir = "data/neural/language/algorithm/"
 os.makedirs(output_dir, exist_ok=True)
 
 memory = {}
@@ -39,6 +38,8 @@ def save_memory(filename, memory):
     print(f"Saved learned memory to {output_path}")
 
 def process():
+    global memory  # Correct placement of global declaration
+
     for file in os.listdir(input_dir):
         if not file.endswith(".py"):
             continue
@@ -64,14 +65,6 @@ def process():
                 local_memory[pattern][prediction] = 0
             local_memory[pattern][prediction] += 1
 
-        # 🔁 Generalize before saving
-        generalized = generalize(local_memory)
-        for pattern, predictions in generalized.items():
-            if pattern not in local_memory:
-                local_memory[pattern] = {}
-            for pred, count in predictions.items():
-                local_memory[pattern][pred] = local_memory[pattern].get(pred, 0) + count
-
         base_name = Path(file).stem.replace("text_", "learned_")
         out_name = f"{base_name}.py"
         save_memory(out_name, local_memory)
@@ -83,6 +76,11 @@ def process():
             else:
                 for pred, count in v.items():
                     memory[k][pred] = memory[k].get(pred, 0) + count
+
+    # Apply generalization step and update global memory
+    generalized_memory = generalizer.generalize_all(memory)
+    print(f"Generalized {len(generalized_memory)} total patterns.")
+    memory = generalized_memory  # update global memory to generalized version
 
 def predict(prev, delta, xor):
     key = (prev, delta, xor)
