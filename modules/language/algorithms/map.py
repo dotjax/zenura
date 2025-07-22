@@ -5,17 +5,64 @@ from datetime import datetime
 from pathlib import Path
 
 input_dir = "data/neural/language/input/user/"
-output_dir = "data/neural/language/algorithm/"
+output_dir = "data/neural/language/learned/"
 os.makedirs(output_dir, exist_ok=True)
 
 memory = {}
 
 def load_input_file(path):
+    """Load input file safely, handling binary number syntax issues."""
     with open(path, 'r', encoding='utf-8') as f:
         data = f.read()
+    
+    # Create a safe namespace with only the variables we need
     namespace = {}
-    exec(data, namespace)
-    return namespace
+    
+    # Extract the byte_values, delta, and xor lists using ast
+    try:
+        # Parse the file content
+        tree = ast.parse(data)
+        
+        # Find the assignments we need
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Assign):
+                for target in node.targets:
+                    if isinstance(target, ast.Name) and target.id in ['byte_values', 'delta', 'xor']:
+                        # Safely evaluate the value
+                        try:
+                            value = ast.literal_eval(node.value)
+                            namespace[target.id] = value
+                        except (ValueError, SyntaxError):
+                            print(f"Warning: Could not parse {target.id} in {path}")
+                            continue
+        
+        return namespace
+        
+    except SyntaxError as e:
+        print(f"Warning: Syntax error in {path}: {e}")
+        # Fallback: try to extract just the byte_values using regex
+        import re
+        byte_match = re.search(r'byte_values\s*=\s*(\[.*?\])', data, re.DOTALL)
+        delta_match = re.search(r'delta\s*=\s*(\[.*?\])', data, re.DOTALL)
+        xor_match = re.search(r'xor\s*=\s*(\[.*?\])', data, re.DOTALL)
+        
+        if byte_match:
+            try:
+                namespace['byte_values'] = ast.literal_eval(byte_match.group(1))
+            except:
+                pass
+        if delta_match:
+            try:
+                namespace['delta'] = ast.literal_eval(delta_match.group(1))
+            except:
+                pass
+        if xor_match:
+            try:
+                namespace['xor'] = ast.literal_eval(xor_match.group(1))
+            except:
+                pass
+        
+        return namespace
 
 def update_memory(byte_values, delta, xor):
     for i in range(1, len(byte_values)):

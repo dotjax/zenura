@@ -5,6 +5,9 @@ __pycache__/
 # Data
 data/
 
+# .old
+.old/
+
 # C extensions
 *.so
 
