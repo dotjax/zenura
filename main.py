@@ -10,30 +10,23 @@ def interactive_loop():
     while True:
         try:
             user_input = input("Enter text: ").strip()
+            
             if user_input.lower() in {"exit", "quit"}:
                 print("Exiting...")
                 break
+
             if not user_input:
                 print("Empty input detected. Try again.\n")
                 continue
 
-            # Show the analysis for the user's input
             text_to_file(user_input, input_dir, "text_", show_analysis=True)
-
             algorithm.process()
             generated_bytes = generator.generate_response(algorithm.memory)
             
             if generated_bytes:
                 response = bytes(generated_bytes).decode('utf-8', errors='ignore')
-                
-                # --- The order of these next two lines is now swapped ---
-
-                # 1. Save the response file quietly first.
                 text_to_file(response, output_dir, "response_", show_analysis=False)
-                
-                # 2. Print the response to the screen.
                 print(f"Response: {response}\n")
-
             else:
                 print("Response: (Could not generate a response from current memory)\n")
 

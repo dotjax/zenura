@@ -2,19 +2,21 @@ def generalize(memory):
     generalized = {}
 
     for pattern, outcomes in memory.items():
-        total = sum(outcomes.values())
-        if total < 3:
-            # Too sparse to generalize usefully
+        if not outcomes:
             continue
 
-        # Example: Build averaged weights for stronger generalization
-        average_prediction = int(round(
-            sum(pred * count for pred, count in outcomes.items()) / total
-        ))
+        # Find the most common outcome and its count
+        winner, max_count = max(outcomes.items(), key=lambda item: item[1])
 
-        # Store generalized pattern
-        generalized[pattern] = {
-            average_prediction: total
+        # Keep only the "strong" outcomes
+        # A strong outcome is the winner or any outcome that's at least 50% as likely
+        strong_outcomes = {
+            pred: count for pred, count in outcomes.items()
+            if count >= max_count * 0.5 
         }
+
+        # If there are any strong outcomes, add them to the new memory
+        if strong_outcomes:
+            generalized[pattern] = strong_outcomes
 
     return generalized
