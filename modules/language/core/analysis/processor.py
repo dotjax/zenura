@@ -1,9 +1,8 @@
-from modules.language.core.analysis import ascii, binary, byte, delta, hex, xor
+from modules.language.core.analysis.tools import ascii, binary, byte, delta, hex, xor
 from modules.language.core.analysis.metadata import length, source, timestamp
 
 def process(text):
-    # Encode using UTF-16 little endian (2 bytes per character)
-    byte_data = text.encode('utf-16-le')
+    byte_data = text.encode('utf-8')
 
     result = {
         "metadata": {
