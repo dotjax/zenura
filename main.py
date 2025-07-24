@@ -1,7 +1,5 @@
-import os
 import sys
 import threading
-from datetime import datetime
 from modules.language.core.autonomy import daemon
 from modules.language.core.analysis import processor
 from modules.language.core.memory import saving
@@ -22,6 +20,8 @@ def main():
             print(learned)
             saving.write_learned(learned, "data/neural/language/learned/delta")
             print("Saved to data/neural/language/learned/delta")
+            predict = delta.predict (result["analysis"]["byte"])
+            print("Prediction based on delta algorithm:", predict)
     except KeyboardInterrupt:
         print("\nExiting cleanly.")
         sys.exit(0)
